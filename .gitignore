@@ -1,0 +1,26 @@
+# gradle
+.gradle/
+build/
+out/
+
+# fabric / loom dev environment
+run/
+remappedSrc/
+
+# IDE
+.idea/
+*.ipr
+*.iws
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
