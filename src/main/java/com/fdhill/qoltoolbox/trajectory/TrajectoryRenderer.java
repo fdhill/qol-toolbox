@@ -70,13 +70,14 @@ public class TrajectoryRenderer {
 		}
 
 		Matrix4f matrix = ctx.matrixStack().peek().getPositionMatrix();
+		Vec3d cam = ctx.camera().getPos();
 		BufferBuilder buf = Tessellator.getInstance()
 				.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
 		for (int i = 1; i < points.size(); i++) {
-			line(buf, matrix, points.get(i - 1), points.get(i));
+			line(buf, matrix, points.get(i - 1).subtract(cam), points.get(i).subtract(cam));
 		}
 		if (landing != null) {
-			boxEdges(buf, matrix, new Box(landing, landing).expand(0.06));
+			boxEdges(buf, matrix, new Box(landing, landing).expand(0.06), cam);
 		}
 		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 		RenderSystem.enableBlend();
@@ -107,13 +108,13 @@ public class TrajectoryRenderer {
 		buf.vertex(m, (float) b.x, (float) b.y, (float) b.z).color(255, 255, 220, 210);
 	}
 
-	private static void boxEdges(BufferBuilder buf, Matrix4f m, Box box) {
-		double x1 = box.minX;
-		double y1 = box.minY;
-		double z1 = box.minZ;
-		double x2 = box.maxX;
-		double y2 = box.maxY;
-		double z2 = box.maxZ;
+	private static void boxEdges(BufferBuilder buf, Matrix4f m, Box box, Vec3d cam) {
+		double x1 = box.minX - cam.x;
+		double y1 = box.minY - cam.y;
+		double z1 = box.minZ - cam.z;
+		double x2 = box.maxX - cam.x;
+		double y2 = box.maxY - cam.y;
+		double z2 = box.maxZ - cam.z;
 		line(buf, m, new Vec3d(x1, y1, z1), new Vec3d(x2, y1, z1));
 		line(buf, m, new Vec3d(x2, y1, z1), new Vec3d(x2, y1, z2));
 		line(buf, m, new Vec3d(x2, y1, z2), new Vec3d(x1, y1, z2));
