@@ -13,10 +13,15 @@ public class QolConfig {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	public Fullbright fullbright = new Fullbright();
-	// Later phases append their sections here (veinminer, trajectory, deathmarker, recipeviewer).
+	public Trajectory trajectory = new Trajectory();
+	// Later phases append their sections here (veinminer, deathmarker, recipeviewer).
 
 	public static class Fullbright {
 		public boolean enabled = false;
+	}
+
+	public static class Trajectory {
+		public boolean enabled = true;
 	}
 
 	private static QolConfig instance;
