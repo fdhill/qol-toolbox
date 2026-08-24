@@ -1,0 +1,29 @@
+{
+	"schemaVersion": 1,
+	"id": "qoltoolbox",
+	"version": "${version}",
+	"name": "QoL Toolbox",
+	"description": "Quality of Life utilities: vein miner, death marker, fullbright, mini recipe viewer, arrow trajectory.",
+	"authors": [
+		"fdhill"
+	],
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.fdhill.qoltoolbox.QolMod"
+		],
+		"client": [
+			"com.fdhill.qoltoolbox.QolClient"
+		]
+	},
+	"mixins": [
+		"qoltoolbox.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
