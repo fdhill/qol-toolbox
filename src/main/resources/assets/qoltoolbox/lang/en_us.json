@@ -1,5 +1,7 @@
 {
 	"qoltoolbox.name": "QoL Toolbox",
 	"category.qoltoolbox": "QoL Toolbox",
-	"key.qoltoolbox.fullbright": "Toggle Fullbright"
+	"key.qoltoolbox.fullbright": "Toggle Fullbright",
+	"key.qoltoolbox.deathmarker": "Toggle Death Marker",
+	"text.qoltoolbox.death_marker_hud": "Died at %s (%s)"
 }

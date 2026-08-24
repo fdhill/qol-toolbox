@@ -1,5 +1,7 @@
 {
 	"qoltoolbox.name": "QoL Toolbox",
 	"category.qoltoolbox": "QoL Toolbox",
-	"key.qoltoolbox.fullbright": "Aktifkan/Nonaktifkan Fullbright"
+	"key.qoltoolbox.fullbright": "Aktifkan/Nonaktifkan Fullbright",
+	"key.qoltoolbox.deathmarker": "Aktifkan/Nonaktifkan Penanda Kematian",
+	"text.qoltoolbox.death_marker_hud": "Mati di %s (%s)"
 }

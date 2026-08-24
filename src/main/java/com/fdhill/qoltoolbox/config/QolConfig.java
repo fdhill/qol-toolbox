@@ -14,7 +14,8 @@ public class QolConfig {
 
 	public Fullbright fullbright = new Fullbright();
 	public Trajectory trajectory = new Trajectory();
-	// Later phases append their sections here (veinminer, deathmarker, recipeviewer).
+	public DeathMarker deathmarker = new DeathMarker();
+	// Later phases append their sections here (veinminer, recipeviewer).
 
 	public static class Fullbright {
 		public boolean enabled = false;
@@ -22,6 +23,14 @@ public class QolConfig {
 
 	public static class Trajectory {
 		public boolean enabled = true;
+	}
+
+	public static class DeathMarker {
+		public boolean enabled = true;
+		public Double x;
+		public Double y;
+		public Double z;
+		public String dimension;
 	}
 
 	private static QolConfig instance;

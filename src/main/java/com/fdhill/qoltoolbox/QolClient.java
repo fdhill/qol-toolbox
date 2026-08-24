@@ -1,11 +1,13 @@
 package com.fdhill.qoltoolbox;
 
 import com.fdhill.qoltoolbox.config.QolConfig;
+import com.fdhill.qoltoolbox.deathmarker.DeathMarker;
 import com.fdhill.qoltoolbox.fullbright.Fullbright;
 import com.fdhill.qoltoolbox.trajectory.TrajectoryRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -13,6 +15,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class QolClient implements ClientModInitializer {
 	private static KeyBinding fullbrightKey;
+	private static KeyBinding deathMarkerKey;
 
 	@Override
 	public void onInitializeClient() {
@@ -24,15 +27,24 @@ public class QolClient implements ClientModInitializer {
 				GLFW.GLFW_KEY_B,
 				"category.qoltoolbox"));
 
+		deathMarkerKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+				"key.qoltoolbox.deathmarker",
+				InputUtil.Type.KEYSYM,
+				GLFW.GLFW_KEY_J,
+				"category.qoltoolbox"));
+
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (fullbrightKey.wasPressed()) {
 				Fullbright.toggle();
 			}
+			while (deathMarkerKey.wasPressed()) {
+				DeathMarker.toggle();
+			}
 		});
 
-		if (QolConfig.get().trajectory.enabled) {
-			WorldRenderEvents.AFTER_ENTITIES.register(TrajectoryRenderer::render);
-		}
+		WorldRenderEvents.AFTER_ENTITIES.register(TrajectoryRenderer::render);
+		WorldRenderEvents.AFTER_ENTITIES.register(DeathMarker::renderWorld);
+		HudRenderCallback.EVENT.register(DeathMarker::renderHud);
 
 		if (QolConfig.get().fullbright.enabled) {
 			Fullbright.set(true);
