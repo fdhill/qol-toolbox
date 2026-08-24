@@ -1,3 +1,5 @@
 {
-	"qoltoolbox.name": "QoL Toolbox"
+	"qoltoolbox.name": "QoL Toolbox",
+	"category.qoltoolbox": "QoL Toolbox",
+	"key.qoltoolbox.fullbright": "Toggle Fullbright"
 }
