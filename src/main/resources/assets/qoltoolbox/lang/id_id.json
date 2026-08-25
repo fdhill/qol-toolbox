@@ -3,5 +3,9 @@
 	"category.qoltoolbox": "QoL Toolbox",
 	"key.qoltoolbox.fullbright": "Aktifkan/Nonaktifkan Fullbright",
 	"key.qoltoolbox.deathmarker": "Aktifkan/Nonaktifkan Penanda Kematian",
+	"key.qoltoolbox.recipeviewer": "Buka Mini Recipe Viewer",
+	"screen.qoltoolbox.recipeviewer": "Mini Recipe Viewer",
+	"text.qoltoolbox.recipe_no_match": "Tidak ada resep yang cocok",
+	"text.qoltoolbox.recipe_select_hint": "Klik resep untuk melihat bahan",
 	"text.qoltoolbox.death_marker_hud": "Mati di %s (%s)"
 }
