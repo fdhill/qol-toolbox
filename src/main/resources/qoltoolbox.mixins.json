@@ -7,7 +7,7 @@
 	"mixins": [],
 	"client": [
 		"SimpleOptionAccessor",
-		"ClientPlayerEntityMixin"
+		"LivingEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
