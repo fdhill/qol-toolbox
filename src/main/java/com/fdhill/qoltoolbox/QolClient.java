@@ -4,6 +4,7 @@ import com.fdhill.qoltoolbox.config.QolConfig;
 import com.fdhill.qoltoolbox.deathmarker.DeathMarker;
 import com.fdhill.qoltoolbox.fullbright.Fullbright;
 import com.fdhill.qoltoolbox.recipeviewer.RecipeViewerScreen;
+import com.fdhill.qoltoolbox.settings.SettingsScreen;
 import com.fdhill.qoltoolbox.trajectory.TrajectoryRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -19,6 +20,7 @@ public class QolClient implements ClientModInitializer {
 	private static KeyBinding fullbrightKey;
 	private static KeyBinding deathMarkerKey;
 	private static KeyBinding recipeViewerKey;
+	private static KeyBinding settingsKey;
 
 	@Override
 	public void onInitializeClient() {
@@ -27,6 +29,7 @@ public class QolClient implements ClientModInitializer {
 		fullbrightKey = register("key.qoltoolbox.fullbright", GLFW.GLFW_KEY_B);
 		deathMarkerKey = register("key.qoltoolbox.deathmarker", GLFW.GLFW_KEY_J);
 		recipeViewerKey = register("key.qoltoolbox.recipeviewer", GLFW.GLFW_KEY_R);
+		settingsKey = register("key.qoltoolbox.settings", GLFW.GLFW_KEY_K);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (fullbrightKey.wasPressed()) {
@@ -37,6 +40,9 @@ public class QolClient implements ClientModInitializer {
 			}
 			while (recipeViewerKey.wasPressed()) {
 				openRecipeViewer(client);
+			}
+			while (settingsKey.wasPressed()) {
+				openSettings(client);
 			}
 		});
 
@@ -60,5 +66,12 @@ public class QolClient implements ClientModInitializer {
 			return;
 		}
 		client.setScreen(new RecipeViewerScreen());
+	}
+
+	private static void openSettings(net.minecraft.client.MinecraftClient client) {
+		if (client.currentScreen != null) {
+			return;
+		}
+		client.setScreen(new SettingsScreen());
 	}
 }
