@@ -4,7 +4,9 @@
 	"package": "com.fdhill.qoltoolbox.mixin",
 	"refmap": "qoltoolbox.refmap.json",
 	"compatibilityLevel": "JAVA_21",
-	"mixins": [],
+	"mixins": [
+		"BlockBreakMixin"
+	],
 	"client": [
 		"SimpleOptionAccessor",
 		"LivingEntityMixin"

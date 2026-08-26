@@ -10,12 +10,13 @@ import net.minecraft.text.Text;
 import java.util.ArrayList;
 import java.util.List;
 
-// ponytail: flat layout, no scroll container — 5 features + veinminer whitelist fit on one screen.
+// ponytail: compact flat layout — 5 toggles + veinminer whitelist on one screen.
 public class SettingsScreen extends Screen {
-	private static final int PANEL_W = 300;
-	private static final int ROW_H = 20;
-	private static final int TOGGLE_W = 60;
-	private static final int VISIBLE_WL = 6;
+	private static final int PANEL_W = 260;
+	private static final int ROW_H = 16;
+	private static final int TOGGLE_W = 50;
+	private static final int VISIBLE_WL = 4;
+	private static final int PAD = 8;
 
 	private int panelX;
 	private int panelY;
@@ -39,28 +40,12 @@ public class SettingsScreen extends Screen {
 		QolConfig cfg = QolConfig.get();
 		toggles.clear();
 
-		// ponytail: calculate panel dimensions FIRST, then build toggles with correct offsets
-		int vmSectionH = 24 + ROW_H + 6 + VISIBLE_WL * ROW_H + 4 + 18;
-		panelH = 5 * ROW_H + 12 + vmSectionH + 10;
-		panelX = (width - PANEL_W) / 2;
-		panelY = (height - panelH) / 2;
-
-		// ponytail: store y offset relative to panel top, add panelY during render
-		int toggleY = 6; // title takes ~6px
+		// ponytail: pre-calculate toggle offsets
+		String[] names = {"Fullbright", "Trajectory", "Death Marker", "Recipe Viewer", "Vein Miner"};
 		for (int i = 0; i < 5; i++) {
-			int oy = toggleY;
-			String label = switch (i) {
-				case 0 -> "Fullbright";
-				case 1 -> "Trajectory";
-				case 2 -> "Death Marker";
-				case 3 -> "Recipe Viewer";
-				case 4 -> "Vein Miner";
-				default -> "";
-			};
-			toggles.add(new ToggleRow(oy, label, null, null));
-			toggleY += ROW_H;
+			int oy = PAD + 14 + i * ROW_H; // title height = 14
+			toggles.add(new ToggleRow(oy, names[i], null, null));
 		}
-		// ponytail: set getters/setters separately to avoid capturing 'this' before record init
 		toggles.set(0, new ToggleRow(toggles.get(0).offsetY, "Fullbright",
 				() -> cfg.fullbright.enabled, v -> { cfg.fullbright.enabled = v; Fullbright.set(v); }));
 		toggles.set(1, new ToggleRow(toggles.get(1).offsetY, "Trajectory",
@@ -72,9 +57,15 @@ public class SettingsScreen extends Screen {
 		toggles.set(4, new ToggleRow(toggles.get(4).offsetY, "Vein Miner",
 				() -> cfg.veinminer.enabled, v -> cfg.veinminer.enabled = v));
 
-		// Max blocks field — positioned inside panel
-		int vmY = panelY + 5 * ROW_H + 12 + 24;
-		maxBlocksField = new TextFieldWidget(textRenderer, panelX + 80, vmY, 50, 14,
+		// ponytail: panel height = title + toggles + separator + vm section + padding
+		int vmSectionH = 14 + ROW_H + 4 + 10 + VISIBLE_WL * ROW_H + 4 + ROW_H;
+		panelH = PAD + 14 + 5 * ROW_H + 4 + vmSectionH + PAD;
+		panelX = (width - PANEL_W) / 2;
+		panelY = (height - panelH) / 2;
+
+		// Max blocks field
+		int vmBaseY = panelY + PAD + 14 + 5 * ROW_H + 4 + 14;
+		maxBlocksField = new TextFieldWidget(textRenderer, panelX + 70, vmBaseY, 40, 12,
 				Text.literal("Max Blocks"));
 		maxBlocksField.setText(String.valueOf(cfg.veinminer.maxBlocks));
 		maxBlocksField.setChangedListener(s -> {
@@ -85,10 +76,10 @@ public class SettingsScreen extends Screen {
 		});
 		addDrawableChild(maxBlocksField);
 
-		// Add block field — positioned inside panel
-		int addY = vmY + ROW_H + 6 + VISIBLE_WL * ROW_H + 2;
-		addBlockField = new TextFieldWidget(textRenderer, panelX + 6, addY, PANEL_W - 76, 14,
-				Text.literal("Add block"));
+		// Add block field
+		int addFieldY = panelY + panelH - PAD - ROW_H - 2;
+		addBlockField = new TextFieldWidget(textRenderer, panelX + PAD, addFieldY,
+				PANEL_W - PAD - TOGGLE_W - 4, 12, Text.literal("Add block"));
 		addBlockField.setPlaceholder(Text.literal("minecraft:stone"));
 		addDrawableChild(addBlockField);
 		setInitialFocus(addBlockField);
@@ -99,73 +90,78 @@ public class SettingsScreen extends Screen {
 		renderBackground(ctx, mouseX, mouseY, delta);
 
 		// Panel background
-		ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + panelH, 0xF0111111);
+		ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + panelH, 0xE0101010);
 
 		// Title
-		ctx.drawText(textRenderer, title, panelX + 6, panelY + 4, 0xFFFFFF55, true);
+		ctx.drawText(textRenderer, title, panelX + PAD, panelY + PAD, 0xFFFFFF55, true);
+
+		// Separator line
+		int sepY1 = panelY + PAD + 14;
+		ctx.fill(panelX + PAD, sepY1, panelX + PANEL_W - PAD, sepY1 + 1, 0xFF555555);
 
 		// Toggle rows
 		QolConfig cfg = QolConfig.get();
 		for (ToggleRow row : toggles) {
 			boolean on = row.getter.getAsBoolean();
 			int absY = panelY + row.offsetY;
-			// Label
-			ctx.drawText(textRenderer, row.label, panelX + 6, absY + 5, 0xFFFFFFFF, true);
-			// Toggle button
-			int bx = panelX + PANEL_W - TOGGLE_W - 6;
-			int by = absY + 2;
-			int color = on ? 0xFF55FF55 : 0xFFFF5555;
-			ctx.fill(bx, by, bx + TOGGLE_W, by + 14, 0xFF333333);
+			ctx.drawText(textRenderer, row.label, panelX + PAD, absY + 3, 0xFFFFFFFF, true);
+			int bx = panelX + PANEL_W - TOGGLE_W - PAD;
+			int by = absY + 1;
+			ctx.fill(bx, by, bx + TOGGLE_W, by + 12, on ? 0xFF2A6B2A : 0xFF6B2A2A);
 			String txt = on ? "ON" : "OFF";
 			int tw = textRenderer.getWidth(txt);
-			ctx.drawText(textRenderer, txt, bx + (TOGGLE_W - tw) / 2, by + 3, color, true);
+			ctx.drawText(textRenderer, txt, bx + (TOGGLE_W - tw) / 2, by + 2, 0xFFFFFFFF, true);
 		}
 
+		// Separator line before Vein Miner
+		int sepY2 = panelY + PAD + 14 + 5 * ROW_H + 2;
+		ctx.fill(panelX + PAD, sepY2, panelX + PANEL_W - PAD, sepY2 + 1, 0xFF555555);
+
 		// Vein Miner section
-		int vmY = panelY + 5 * ROW_H + 12;
-		ctx.drawText(textRenderer, "--- Vein Miner ---", panelX + 6, vmY + 5, 0xFFFFFF55, true);
-		vmY += 20;
+		int vmY = sepY2 + 4;
+		ctx.drawText(textRenderer, "Vein Miner", panelX + PAD, vmY, 0xFFFFFF55, true);
+		vmY += 14;
 
 		// Max blocks
-		ctx.drawText(textRenderer, "Max Blocks:", panelX + 6, vmY + 3, 0xFFFFFFFF, true);
-		vmY += ROW_H + 6;
+		ctx.drawText(textRenderer, "Max Blocks:", panelX + PAD, vmY + 2, 0xFFFFFFFF, true);
+		vmY += ROW_H + 4;
 
-		// Whitelist
-		ctx.drawText(textRenderer, "Whitelist:", panelX + 6, vmY, 0xFFAAAAAA, true);
-		vmY += ROW_H - 4;
-
-		// Whitelist items
+		// Whitelist label + scroll hint
+		ctx.drawText(textRenderer, "Whitelist:", panelX + PAD, vmY, 0xFFAAAAAA, true);
 		List<String> wl = cfg.veinminer.whitelist;
 		int maxScroll = Math.max(0, wl.size() - VISIBLE_WL);
 		whitelistScroll = Math.max(0, Math.min(maxScroll, whitelistScroll));
+		if (wl.size() > VISIBLE_WL) {
+			String scrollTxt = (whitelistScroll + 1) + "-" +
+					Math.min(whitelistScroll + VISIBLE_WL, wl.size()) + "/" + wl.size();
+			int sw = textRenderer.getWidth(scrollTxt);
+			ctx.drawText(textRenderer, scrollTxt, panelX + PANEL_W - PAD - sw, vmY, 0xFF888888, true);
+		}
+		vmY += 10;
 
+		// Whitelist items
 		for (int i = 0; i < VISIBLE_WL && whitelistScroll + i < wl.size(); i++) {
-			int itemY = vmY + i * ROW_H;
+			int itemY = vmY + i * (ROW_H - 2);
 			String entry = wl.get(whitelistScroll + i);
-			String display = textRenderer.trimToWidth(entry, PANEL_W - 40);
-			ctx.drawText(textRenderer, display, panelX + 6, itemY + 3, 0xFFFFFFFF, true);
-			// Remove button [×]
-			int rmx = panelX + PANEL_W - 20;
-			boolean hoverX = mouseX >= rmx && mouseX <= rmx + 14 && mouseY >= itemY && mouseY <= itemY + 14;
-			ctx.fill(rmx, itemY, rmx + 14, itemY + 14, hoverX ? 0xFFFF5555 : 0xFF555555);
-			ctx.drawText(textRenderer, "x", rmx + 4, itemY + 3, 0xFFFFFFFF, true);
+			String display = textRenderer.trimToWidth(entry, PANEL_W - PAD * 2 - 18);
+			ctx.drawText(textRenderer, display, panelX + PAD + 2, itemY + 1, 0xFFFFFFFF, false);
+			// Remove button
+			int rmx = panelX + PANEL_W - PAD - 14;
+			boolean hoverX = mouseX >= rmx && mouseX <= rmx + 12 && mouseY >= itemY && mouseY <= itemY + 12;
+			ctx.fill(rmx, itemY, rmx + 12, itemY + 12, hoverX ? 0xFFFF5555 : 0xFF444444);
+			ctx.drawText(textRenderer, "x", rmx + 4, itemY + 2, 0xFFFFFFFF, true);
 		}
 		if (wl.isEmpty()) {
-			ctx.drawText(textRenderer, "(empty)", panelX + 6, vmY + 3, 0xFF888888, true);
-		}
-
-		// Scroll hint
-		if (wl.size() > VISIBLE_WL) {
-			ctx.drawText(textRenderer, whitelistScroll + "/" + maxScroll,
-					panelX + PANEL_W - 80, vmY - 2, 0xFF888888, true);
+			ctx.drawText(textRenderer, "(empty)", panelX + PAD + 2, vmY + 1, 0xFF666666, false);
 		}
 
 		// Add block button
-		int addY = vmY + VISIBLE_WL * ROW_H + 2;
-		int addBtnX = panelX + PANEL_W - 60;
-		boolean hoverAdd = mouseX >= addBtnX && mouseX <= addBtnX + 54 && mouseY >= addY && mouseY <= addY + 16;
-		ctx.fill(addBtnX, addY, addBtnX + 54, addY + 16, hoverAdd ? 0xFF55AA55 : 0xFF336633);
-		ctx.drawText(textRenderer, "Add", addBtnX + 18, addY + 4, 0xFFFFFFFF, true);
+		int addBtnY = panelY + panelH - PAD - ROW_H - 2;
+		int addBtnX = panelX + PANEL_W - PAD - TOGGLE_W;
+		boolean hoverAdd = mouseX >= addBtnX && mouseX <= addBtnX + TOGGLE_W &&
+				mouseY >= addBtnY && mouseY <= addBtnY + 12;
+		ctx.fill(addBtnX, addBtnY, addBtnX + TOGGLE_W, addBtnY + 12, hoverAdd ? 0xFF55AA55 : 0xFF336633);
+		ctx.drawText(textRenderer, "Add", addBtnX + 16, addBtnY + 2, 0xFFFFFFFF, true);
 
 		super.render(ctx, mouseX, mouseY, delta);
 	}
@@ -178,9 +174,9 @@ public class SettingsScreen extends Screen {
 
 		// Toggle clicks
 		for (ToggleRow row : toggles) {
-			int bx = panelX + PANEL_W - TOGGLE_W - 6;
-			int absY = panelY + row.offsetY + 2;
-			if (mouseX >= bx && mouseX <= bx + TOGGLE_W && mouseY >= absY && mouseY <= absY + 14) {
+			int bx = panelX + PANEL_W - TOGGLE_W - PAD;
+			int absY = panelY + row.offsetY + 1;
+			if (mouseX >= bx && mouseX <= bx + TOGGLE_W && mouseY >= absY && mouseY <= absY + 12) {
 				row.setter.accept(!row.getter.getAsBoolean());
 				QolConfig.save();
 				return true;
@@ -188,11 +184,11 @@ public class SettingsScreen extends Screen {
 		}
 
 		// Whitelist remove clicks
-		int vmY = panelY + 5 * ROW_H + 12 + 20 + ROW_H - 4;
+		int vmY = panelY + PAD + 14 + 5 * ROW_H + 4 + 14 + ROW_H + 4 + 10;
 		for (int i = 0; i < VISIBLE_WL && whitelistScroll + i < cfg.veinminer.whitelist.size(); i++) {
-			int itemY = vmY + i * ROW_H;
-			int rmx = panelX + PANEL_W - 20;
-			if (mouseX >= rmx && mouseX <= rmx + 14 && mouseY >= itemY && mouseY <= itemY + 14) {
+			int itemY = vmY + i * (ROW_H - 2);
+			int rmx = panelX + PANEL_W - PAD - 14;
+			if (mouseX >= rmx && mouseX <= rmx + 12 && mouseY >= itemY && mouseY <= itemY + 12) {
 				cfg.veinminer.whitelist.remove(whitelistScroll + i);
 				QolConfig.save();
 				return true;
@@ -200,9 +196,9 @@ public class SettingsScreen extends Screen {
 		}
 
 		// Add block button
-		int addY = vmY + VISIBLE_WL * ROW_H + 2;
-		int addBtnX = panelX + PANEL_W - 60;
-		if (mouseX >= addBtnX && mouseX <= addBtnX + 54 && mouseY >= addY && mouseY <= addY + 16) {
+		int addBtnY = panelY + panelH - PAD - ROW_H - 2;
+		int addBtnX = panelX + PANEL_W - PAD - TOGGLE_W;
+		if (mouseX >= addBtnX && mouseX <= addBtnX + TOGGLE_W && mouseY >= addBtnY && mouseY <= addBtnY + 12) {
 			addBlock();
 			return true;
 		}

@@ -1,7 +1,6 @@
 package com.fdhill.qoltoolbox;
 
 import com.fdhill.qoltoolbox.config.QolConfig;
-import com.fdhill.qoltoolbox.veinminer.VeinMiner;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
@@ -18,7 +17,6 @@ public class QolMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		QolConfig.load();
-		VeinMiner.register();
 		registerCommands();
 		LOGGER.info("QoL Toolbox initialized");
 	}

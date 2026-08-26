@@ -21,6 +21,7 @@ public class QolClient implements ClientModInitializer {
 	private static KeyBinding deathMarkerKey;
 	private static KeyBinding recipeViewerKey;
 	private static KeyBinding settingsKey;
+	private static boolean restoredFullbright;
 
 	@Override
 	public void onInitializeClient() {
@@ -32,6 +33,11 @@ public class QolClient implements ClientModInitializer {
 		settingsKey = register("key.qoltoolbox.settings", GLFW.GLFW_KEY_K);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			// ponytail: defer fullbright restore to first tick — options is null during entrypoint
+			if (!restoredFullbright && QolConfig.get().fullbright.enabled) {
+				Fullbright.set(true);
+				restoredFullbright = true;
+			}
 			while (fullbrightKey.wasPressed()) {
 				Fullbright.toggle();
 			}
@@ -49,10 +55,6 @@ public class QolClient implements ClientModInitializer {
 		WorldRenderEvents.AFTER_ENTITIES.register(TrajectoryRenderer::render);
 		WorldRenderEvents.AFTER_ENTITIES.register(DeathMarker::renderWorld);
 		HudRenderCallback.EVENT.register(DeathMarker::renderHud);
-
-		if (QolConfig.get().fullbright.enabled) {
-			Fullbright.set(true);
-		}
 	}
 
 	private static KeyBinding register(String name, int defaultKey) {
