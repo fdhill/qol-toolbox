@@ -10,11 +10,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.block.CraftingTableBlock;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 public class QolClient implements ClientModInitializer {
@@ -57,17 +55,10 @@ public class QolClient implements ClientModInitializer {
 	}
 
 	private static void openRecipeViewer(net.minecraft.client.MinecraftClient client) {
-		ClientPlayerEntity player = client.player;
-		if (client.currentScreen != null || client.world == null || player == null
+		if (client.currentScreen != null || client.world == null || client.player == null
 				|| !QolConfig.get().recipeviewer.enabled) {
 			return;
 		}
-		BlockPos pos = player.getBlockPos();
-		for (BlockPos bp : BlockPos.iterate(pos.add(-4, -4, -4), pos.add(4, 4, 4))) {
-			if (player.getWorld().getBlockState(bp).getBlock() instanceof CraftingTableBlock) {
-				client.setScreen(new RecipeViewerScreen());
-				return;
-			}
-		}
+		client.setScreen(new RecipeViewerScreen());
 	}
 }
