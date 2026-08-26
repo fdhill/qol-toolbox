@@ -7,5 +7,12 @@
 	"screen.qoltoolbox.recipeviewer": "Mini Recipe Viewer",
 	"text.qoltoolbox.recipe_no_match": "No matching recipes",
 	"text.qoltoolbox.recipe_select_hint": "Click a recipe to view ingredients",
-	"text.qoltoolbox.death_marker_hud": "Died at %s (%s)"
+	"text.qoltoolbox.death_marker_hud": "Died at %s (%s)",
+	"commands.qoltoolbox.veinminer.already_added": "%s is already in whitelist",
+	"commands.qoltoolbox.veinminer.added": "Added: %s",
+	"commands.qoltoolbox.veinminer.removed": "Removed: %s",
+	"commands.qoltoolbox.veinminer.not_found": "%s not found",
+	"commands.qoltoolbox.veinminer.list": "Whitelist (%d): %s",
+	"commands.qoltoolbox.veinminer.max_set": "Max blocks: %d",
+	"commands.qoltoolbox.veinminer.toggle": "Vein Miner: %s"
 }

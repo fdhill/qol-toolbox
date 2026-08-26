@@ -30,12 +30,12 @@ public class QolMod implements ModInitializer {
 					String block = StringArgumentType.getString(ctx, "block");
 					QolConfig.VeinMiner cfg = QolConfig.get().veinminer;
 					if (cfg.whitelist.contains(block)) {
-						ctx.getSource().sendFeedback(() -> Text.literal(block + " sudah ada di whitelist"), false);
+						ctx.getSource().sendFeedback(() -> Text.translatable("commands.qoltoolbox.veinminer.already_added", block), false);
 						return 0;
 					}
 					cfg.whitelist.add(block);
 					QolConfig.save();
-					ctx.getSource().sendFeedback(() -> Text.literal("Ditambahkan: " + block), false);
+					ctx.getSource().sendFeedback(() -> Text.translatable("commands.qoltoolbox.veinminer.added", block), false);
 					return 1;
 				})))
 				.then(CommandManager.literal("remove").then(CommandManager.argument("block", StringArgumentType.word()).executes(ctx -> {
@@ -43,29 +43,31 @@ public class QolMod implements ModInitializer {
 					QolConfig.VeinMiner cfg = QolConfig.get().veinminer;
 					if (cfg.whitelist.remove(block)) {
 						QolConfig.save();
-						ctx.getSource().sendFeedback(() -> Text.literal("Dihapus: " + block), false);
+						ctx.getSource().sendFeedback(() -> Text.translatable("commands.qoltoolbox.veinminer.removed", block), false);
 					} else {
-						ctx.getSource().sendFeedback(() -> Text.literal(block + " tidak ditemukan"), false);
+						ctx.getSource().sendFeedback(() -> Text.translatable("commands.qoltoolbox.veinminer.not_found", block), false);
 					}
 					return 1;
 				})))
 				.then(CommandManager.literal("list").executes(ctx -> {
 					QolConfig.VeinMiner cfg = QolConfig.get().veinminer;
-					ctx.getSource().sendFeedback(() -> Text.literal("Whitelist (" + cfg.whitelist.size() + "): " + String.join(", ", cfg.whitelist)), false);
+					String list = String.join(", ", cfg.whitelist);
+					ctx.getSource().sendFeedback(() -> Text.translatable("commands.qoltoolbox.veinminer.list", cfg.whitelist.size(), list), false);
 					return cfg.whitelist.size();
 				}))
 				.then(CommandManager.literal("max").then(CommandManager.argument("count", IntegerArgumentType.integer(1, 128)).executes(ctx -> {
 					int count = IntegerArgumentType.getInteger(ctx, "count");
 					QolConfig.get().veinminer.maxBlocks = count;
 					QolConfig.save();
-					ctx.getSource().sendFeedback(() -> Text.literal("Max blocks: " + count), false);
+					ctx.getSource().sendFeedback(() -> Text.translatable("commands.qoltoolbox.veinminer.max_set", count), false);
 					return 1;
 				})))
 				.then(CommandManager.literal("toggle").executes(ctx -> {
 					QolConfig.VeinMiner cfg = QolConfig.get().veinminer;
 					cfg.enabled = !cfg.enabled;
 					QolConfig.save();
-					ctx.getSource().sendFeedback(() -> Text.literal("Vein Miner: " + (cfg.enabled ? "ON" : "OFF")), false);
+					String state = cfg.enabled ? "ON" : "OFF";
+					ctx.getSource().sendFeedback(() -> Text.translatable("commands.qoltoolbox.veinminer.toggle", state), false);
 					return 1;
 				}))
 			));

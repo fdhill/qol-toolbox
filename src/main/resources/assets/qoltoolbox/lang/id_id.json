@@ -7,5 +7,12 @@
 	"screen.qoltoolbox.recipeviewer": "Mini Recipe Viewer",
 	"text.qoltoolbox.recipe_no_match": "Tidak ada resep yang cocok",
 	"text.qoltoolbox.recipe_select_hint": "Klik resep untuk melihat bahan",
-	"text.qoltoolbox.death_marker_hud": "Mati di %s (%s)"
+	"text.qoltoolbox.death_marker_hud": "Mati di %s (%s)",
+	"commands.qoltoolbox.veinminer.already_added": "%s sudah ada di whitelist",
+	"commands.qoltoolbox.veinminer.added": "Ditambahkan: %s",
+	"commands.qoltoolbox.veinminer.removed": "Dihapus: %s",
+	"commands.qoltoolbox.veinminer.not_found": "%s tidak ditemukan",
+	"commands.qoltoolbox.veinminer.list": "Whitelist (%d): %s",
+	"commands.qoltoolbox.veinminer.max_set": "Max blok: %d",
+	"commands.qoltoolbox.veinminer.toggle": "Vein Miner: %s"
 }
