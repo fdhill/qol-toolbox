@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin {
-	@Inject(method = "onDeath", at = @At("TAIL"))
+	@Inject(method = "onDeath(Lnet/minecraft/entity/damage/DamageSource;)V", at = @At("TAIL"))
 	private void qoltoolbox$onDeath(DamageSource source, CallbackInfo ci) {
 		DeathMarker.record((ClientPlayerEntity) (Object) this);
 	}

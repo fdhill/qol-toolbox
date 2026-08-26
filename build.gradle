@@ -2,6 +2,14 @@ plugins {
 	id 'fabric-loom' version "${loom_version}"
 }
 
+loom {
+	mixin {
+		defaultRefmapName = "qoltoolbox.refmap.json"
+		// ponytail: useLegacyMixinAp needed for refmap generation in Loom 1.17+
+		useLegacyMixinAp = true
+	}
+}
+
 version = project.mod_version
 group = project.maven_group
 
