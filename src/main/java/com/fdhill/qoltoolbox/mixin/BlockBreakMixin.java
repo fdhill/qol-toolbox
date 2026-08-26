@@ -10,7 +10,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,14 +46,23 @@ public abstract class BlockBreakMixin {
 			int broken = 0;
 
 			for (BlockPos bp : vein) {
-				if (bp.equals(pos)) continue; // vanilla already breaks origin
+				if (bp.equals(pos)) continue;
 
 				BlockState bs = serverWorld.getBlockState(bp);
 				if (bs.isAir()) continue;
 
-				// ponytail: breakBlock with player entity for proper loot + client sync
-				serverWorld.breakBlock(bp, true, player);
+				// ponytail: check tool suitability — blocks that require correct tool won't drop without it
+				boolean canHarvest = isCreative || canHarvest(bs, tool);
 
+				if (canHarvest) {
+					// drop items + remove block
+					serverWorld.breakBlock(bp, true, player);
+				} else {
+					// remove block without drops — block broken but no item
+					serverWorld.removeBlock(bp, false);
+				}
+
+				// durability damage for each block broken
 				if (!tool.isEmpty() && !isCreative) {
 					tool.damage(1, player, EquipmentSlot.MAINHAND);
 					if (tool.getDamage() >= tool.getMaxDamage()) break;
@@ -65,5 +73,12 @@ public abstract class BlockBreakMixin {
 		} finally {
 			VeinMiner.processing = false;
 		}
+	}
+
+	private static boolean canHarvest(BlockState state, ItemStack tool) {
+		// ponytail: blocks without tool requirement (dirt, sand, grass) can be mined barehanded
+		if (!state.isToolRequired()) return true;
+		// ponytail: tool.isSuitableFor checks pickaxe level vs block mining level
+		return !tool.isEmpty() && tool.isSuitableFor(state);
 	}
 }
