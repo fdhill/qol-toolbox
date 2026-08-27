@@ -35,7 +35,7 @@ public class VeinMinerSettingsScreen extends Screen {
 
 		// Calculate panel height
 		int whitelistH = VISIBLE_WL * (ROW_H - 2);
-		int bottomRowH = ROW_H + 4 + 12 + 4; // add field row + add button
+		int bottomRowH = ROW_H + 4 + 12 + 4 + ROW_H + 4; // add field + gap + back button + gap
 		panelH = PAD + 14 + 4 + ROW_H + 4 + 14 + whitelistH + 4 + bottomRowH + PAD;
 		panelX = (width - PANEL_W) / 2;
 		panelY = (height - panelH) / 2;
@@ -54,7 +54,7 @@ public class VeinMinerSettingsScreen extends Screen {
 		addDrawableChild(maxBlocksField);
 
 		// Add block field
-		int addFieldY = panelY + panelH - PAD - ROW_H - 4;
+		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - ROW_H - 4;
 		addBlockField = new TextFieldWidget(textRenderer, panelX + PAD, addFieldY,
 				PANEL_W - PAD * 2 - TOGGLE_W - 4, 12, Text.literal("Add block"));
 		addBlockField.setPlaceholder(Text.literal("minecraft:stone"));
@@ -126,8 +126,8 @@ public class VeinMinerSettingsScreen extends Screen {
 			ctx.drawText(textRenderer, "(empty — add blocks below)", panelX + PAD + 4, wlY + 20, 0xFF777777, false);
 		}
 
-		// Add block field + button
-		int addFieldY = panelY + panelH - PAD - ROW_H - 4;
+		// Add block field + button (positioned above Back button with clear spacing)
+		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - ROW_H - 4;
 		int addBtnX = panelX + PANEL_W - PAD - TOGGLE_W;
 		boolean hoverAdd = mouseX >= addBtnX && mouseX <= addBtnX + TOGGLE_W &&
 				mouseY >= addFieldY && mouseY <= addFieldY + 12;
@@ -166,7 +166,7 @@ public class VeinMinerSettingsScreen extends Screen {
 		}
 
 		// Add block button
-		int addFieldY = panelY + panelH - PAD - ROW_H - 4;
+		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - ROW_H - 4;
 		int addBtnX = panelX + PANEL_W - PAD - TOGGLE_W;
 		if (mouseX >= addBtnX && mouseX <= addBtnX + TOGGLE_W &&
 				mouseY >= addFieldY && mouseY <= addFieldY + 12) {

@@ -63,6 +63,14 @@ public class SettingsScreen extends Screen {
 		// Title
 		ctx.drawText(textRenderer, title, panelX + PAD, panelY + PAD, 0xFFFFFF55, true);
 
+		// Exit button (X) in top-right corner
+		int exitX = panelX + PANEL_W - PAD - 12;
+		int exitY = panelY + PAD;
+		boolean hoverExit = mouseX >= exitX && mouseX <= exitX + 12 &&
+				mouseY >= exitY && mouseY <= exitY + 12;
+		ctx.fill(exitX, exitY, exitX + 12, exitY + 12, hoverExit ? 0xFFFF5555 : 0xFF664444);
+		ctx.drawText(textRenderer, "X", exitX + 4, exitY + 2, 0xFFFFFFFF, true);
+
 		// Separator
 		int sepY = panelY + PAD + 14;
 		ctx.fill(panelX + PAD, sepY, panelX + PANEL_W - PAD, sepY + 1, 0xFF555555);
@@ -116,6 +124,15 @@ public class SettingsScreen extends Screen {
 		if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
 
 		QolConfig cfg = QolConfig.get();
+
+		// Exit button (X)
+		int exitX = panelX + PANEL_W - PAD - 12;
+		int exitY = panelY + PAD;
+		if (mouseX >= exitX && mouseX <= exitX + 12 &&
+				mouseY >= exitY && mouseY <= exitY + 12) {
+			client.setScreen(null);
+			return true;
+		}
 
 		for (ToggleRow row : toggles) {
 			int absY = panelY + PAD + 14 + row.index * ROW_H;
