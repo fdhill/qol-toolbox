@@ -77,7 +77,17 @@ public class SettingsScreen extends Screen {
 
 			int btnX = panelX + PANEL_W - PAD;
 
-			// Settings button for VeinMiner (⚙)
+			// Settings button for DeathMarker (...)
+			if (row.index == 2) {
+				int sx = btnX - SETTINGS_W - 4;
+				boolean hoverS = mouseX >= sx && mouseX <= sx + SETTINGS_W &&
+						mouseY >= absY + 2 && mouseY <= absY + 14;
+				ctx.fill(sx, absY + 2, sx + SETTINGS_W, absY + 14, hoverS ? 0xFF555588 : 0xFF444466);
+				ctx.drawText(textRenderer, "...", sx + 3, absY + 4, 0xFFFFFFFF, true);
+				btnX = sx - 4;
+			}
+
+			// Settings button for VeinMiner (...)
 			if (row.index == 4) {
 				int sx = btnX - SETTINGS_W - 4;
 				boolean hoverS = mouseX >= sx && mouseX <= sx + SETTINGS_W &&
@@ -111,7 +121,18 @@ public class SettingsScreen extends Screen {
 			int absY = panelY + PAD + 14 + row.index * ROW_H;
 			int btnX = panelX + PANEL_W - PAD;
 
-			// Settings button (⚙) for VeinMiner
+			// Settings button (...) for DeathMarker
+			if (row.index == 2) {
+				int sx = btnX - SETTINGS_W - 4;
+				if (mouseX >= sx && mouseX <= sx + SETTINGS_W &&
+						mouseY >= absY + 2 && mouseY <= absY + 14) {
+					client.setScreen(new DeathMarkerSettingsScreen(this));
+					return true;
+				}
+				btnX = sx - 4;
+			}
+
+			// Settings button (...) for VeinMiner
 			if (row.index == 4) {
 				int sx = btnX - SETTINGS_W - 4;
 				if (mouseX >= sx && mouseX <= sx + SETTINGS_W &&

@@ -40,6 +40,15 @@ public class DeathMarker {
 		QolConfig.save();
 	}
 
+	public static void reset() {
+		QolConfig.DeathMarker cfg = QolConfig.get().deathmarker;
+		cfg.x = null;
+		cfg.y = null;
+		cfg.z = null;
+		cfg.dimension = null;
+		QolConfig.save();
+	}
+
 	public static void renderWorld(WorldRenderContext ctx) {
 		QolConfig.DeathMarker cfg = QolConfig.get().deathmarker;
 		if (!cfg.enabled || cfg.x == null || cfg.dimension == null) {
@@ -139,6 +148,7 @@ public class DeathMarker {
 
 	private static void drawPillar(Matrix4f matrix, Vec3d cam,
 			double dx, double dy, double dz) {
+		QolConfig.DeathMarker cfg = QolConfig.get().deathmarker;
 		float x1 = (float) (dx - PILLAR_WIDTH - cam.x);
 		float x2 = (float) (dx + PILLAR_WIDTH - cam.x);
 		float z1 = (float) (dz - PILLAR_WIDTH - cam.z);
@@ -152,7 +162,7 @@ public class DeathMarker {
 		RenderSystem.disableDepthTest();
 
 		// Ponytail: 4 translucent quads for pillar, much more visible than DEBUG_LINES
-		int r = 255, g = 40, b = 40, a = 150;
+		int r = cfg.pillarR, g = cfg.pillarG, b = cfg.pillarB, a = 150;
 		BufferBuilder buf = Tessellator.getInstance()
 				.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 		// +X face

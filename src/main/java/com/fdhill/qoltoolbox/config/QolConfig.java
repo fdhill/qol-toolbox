@@ -32,6 +32,9 @@ public class QolConfig {
 		public Double y;
 		public Double z;
 		public String dimension;
+		public int pillarR = 255;
+		public int pillarG = 40;
+		public int pillarB = 40;
 	}
 
 	public static class RecipeViewer {
