@@ -68,8 +68,12 @@ public class RecipeViewerScreen extends Screen {
 	}
 
 	@Override
+	public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {
+		// Skip blur + darkening — game world renders behind panel
+	}
+
+	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		renderBackground(context, mouseX, mouseY, delta);
 		context.fill(panelX, panelY, panelX + PANEL_W, panelY + PANEL_H, 0xF0111111);
 		super.render(context, mouseX, mouseY, delta);
 

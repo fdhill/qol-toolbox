@@ -62,13 +62,16 @@ public class VeinMinerSettingsScreen extends Screen {
 	}
 
 	@Override
-	public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
-		renderBackground(ctx, mouseX, mouseY, delta);
+	public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {
+		// Skip blur + darkening — game world renders behind panel
+	}
 
+	@Override
+	public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		QolConfig.VeinMiner cfg = QolConfig.get().veinminer;
 
 		// Panel background
-		ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + panelH, 0xE0101010);
+		ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + panelH, 0xE0202020);
 
 		// Title
 		ctx.drawText(textRenderer, title, panelX + PAD, panelY + PAD, 0xFFFFFF55, true);
@@ -96,20 +99,31 @@ public class VeinMinerSettingsScreen extends Screen {
 		}
 		wlY += 12;
 
+		// Whitelist background box
+		int wlBoxTop = wlY;
+		int wlBoxBottom = wlY + VISIBLE_WL * (ROW_H - 2);
+		ctx.fill(panelX + PAD, wlBoxTop - 2, panelX + PANEL_W - PAD, wlBoxBottom + 2, 0xFF1A1A2A);
+
 		// Whitelist items
 		for (int i = 0; i < VISIBLE_WL && whitelistScroll + i < wl.size(); i++) {
 			int itemY = wlY + i * (ROW_H - 2);
 			String entry = wl.get(whitelistScroll + i);
 			String display = textRenderer.trimToWidth(entry, PANEL_W - PAD * 2 - 18);
-			ctx.drawText(textRenderer, display, panelX + PAD + 2, itemY + 1, 0xFFFFFFFF, false);
+			// Hover highlight for each item
+			boolean hoverItem = mouseX >= panelX + PAD && mouseX <= panelX + PANEL_W - PAD - 16 &&
+					mouseY >= itemY && mouseY <= itemY + 12;
+			if (hoverItem) {
+				ctx.fill(panelX + PAD, itemY - 1, panelX + PANEL_W - PAD - 16, itemY + 13, 0xFF2A2A4A);
+			}
+			ctx.drawText(textRenderer, display, panelX + PAD + 2, itemY + 1, 0xFFE0E0E0, false);
 			// Remove button
 			int rmx = panelX + PANEL_W - PAD - 14;
 			boolean hoverX = mouseX >= rmx && mouseX <= rmx + 12 && mouseY >= itemY && mouseY <= itemY + 12;
-			ctx.fill(rmx, itemY, rmx + 12, itemY + 12, hoverX ? 0xFFFF5555 : 0xFF444444);
+			ctx.fill(rmx, itemY, rmx + 12, itemY + 12, hoverX ? 0xFFFF5555 : 0xFF553333);
 			ctx.drawText(textRenderer, "x", rmx + 4, itemY + 2, 0xFFFFFFFF, true);
 		}
 		if (wl.isEmpty()) {
-			ctx.drawText(textRenderer, "(empty)", panelX + PAD + 2, wlY + 1, 0xFF666666, false);
+			ctx.drawText(textRenderer, "(empty — add blocks below)", panelX + PAD + 4, wlY + 20, 0xFF777777, false);
 		}
 
 		// Add block field + button

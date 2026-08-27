@@ -51,11 +51,14 @@ public class SettingsScreen extends Screen {
 	}
 
 	@Override
-	public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
-		renderBackground(ctx, mouseX, mouseY, delta);
+	public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {
+		// Skip blur + darkening — game world renders behind panel
+	}
 
+	@Override
+	public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
 		// Panel background
-		ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + (PAD + 14 + toggles.size() * ROW_H + PAD), 0xE0101010);
+		ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + (PAD + 14 + toggles.size() * ROW_H + PAD), 0xE0202020);
 
 		// Title
 		ctx.drawText(textRenderer, title, panelX + PAD, panelY + PAD, 0xFFFFFF55, true);
