@@ -18,7 +18,6 @@ public class QolMod implements ModInitializer {
 	public void onInitialize() {
 		QolConfig.load();
 		registerCommands();
-		LOGGER.info("QoL Toolbox initialized");
 	}
 
 	private static void registerCommands() {

@@ -8,8 +8,7 @@
 		"BlockBreakMixin"
 	],
 	"client": [
-		"SimpleOptionAccessor",
-		"LivingEntityMixin"
+		"SimpleOptionAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

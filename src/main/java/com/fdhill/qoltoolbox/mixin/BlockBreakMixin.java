@@ -1,6 +1,5 @@
 package com.fdhill.qoltoolbox.mixin;
 
-import com.fdhill.qoltoolbox.QolMod;
 import com.fdhill.qoltoolbox.config.QolConfig;
 import com.fdhill.qoltoolbox.veinminer.VeinMiner;
 import net.minecraft.block.Block;
@@ -36,9 +35,6 @@ public abstract class BlockBreakMixin {
 		List<BlockPos> vein = VeinMiner.findConnected(serverWorld, pos, state, cfg.maxBlocks);
 		if (vein.size() <= 1) return;
 
-		QolMod.LOGGER.info("[VeinMiner] Mine {} connected {} blocks from {}", vein.size(),
-				Registries.BLOCK.getId(state.getBlock()), pos);
-
 		VeinMiner.processing = true;
 		try {
 			ItemStack tool = player.getMainHandStack();
@@ -69,7 +65,6 @@ public abstract class BlockBreakMixin {
 				}
 				broken++;
 			}
-			QolMod.LOGGER.info("[VeinMiner] Broke {} extra blocks", broken);
 		} finally {
 			VeinMiner.processing = false;
 		}

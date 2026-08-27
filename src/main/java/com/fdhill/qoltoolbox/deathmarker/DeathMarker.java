@@ -20,7 +20,6 @@ import org.joml.Matrix4f;
 
 public class DeathMarker {
 	private static final Identifier SKULL_TEXTURE = Identifier.of("qoltoolbox", "textures/death_skull.png");
-	private static final double CLEAR_DISTANCE = 5.0;
 	private static final double PILLAR_HEIGHT = 180.0;
 	private static final double PILLAR_WIDTH = 0.15;
 	private static final float SKULL_SIZE = 1.6f;
@@ -41,15 +40,6 @@ public class DeathMarker {
 		QolConfig.save();
 	}
 
-	private static void clear() {
-		QolConfig.DeathMarker cfg = QolConfig.get().deathmarker;
-		cfg.x = null;
-		cfg.y = null;
-		cfg.z = null;
-		cfg.dimension = null;
-		QolConfig.save();
-	}
-
 	public static void renderWorld(WorldRenderContext ctx) {
 		QolConfig.DeathMarker cfg = QolConfig.get().deathmarker;
 		if (!cfg.enabled || cfg.x == null || cfg.dimension == null) {
@@ -64,10 +54,6 @@ public class DeathMarker {
 			return;
 		}
 		Vec3d pos = new Vec3d(cfg.x, cfg.y, cfg.z);
-		if (player.getPos().distanceTo(pos) < CLEAR_DISTANCE) {
-			clear();
-			return;
-		}
 
 		Vec3d cam = ctx.camera().getPos();
 		Matrix4f matrix = ctx.matrixStack().peek().getPositionMatrix();
@@ -166,7 +152,7 @@ public class DeathMarker {
 		RenderSystem.disableDepthTest();
 
 		// Ponytail: 4 translucent quads for pillar, much more visible than DEBUG_LINES
-		int r = 255, g = 40, b = 40, a = 60;
+		int r = 255, g = 40, b = 40, a = 150;
 		BufferBuilder buf = Tessellator.getInstance()
 				.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 		// +X face
