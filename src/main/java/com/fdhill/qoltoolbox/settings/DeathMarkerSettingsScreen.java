@@ -41,17 +41,16 @@ public class DeathMarkerSettingsScreen extends Screen {
 	protected void init() {
 		// title(14) + sep(1+8) + "Last Death"(ROW_H+4) + X/Y/Z(ROW_H) + Dim(ROW_H+8)
 		// + "Pillar Color"(ROW_H+4) + swatches(SWATCH_SIZE+4) + gap(8)
-		// + Reset(ROW_H+4) or (none)(ROW_H+8) + Back(ROW_H) + PAD*2
+		// + Reset(ROW_H+4) + bottom pad(4)
 		panelH = PAD + 14 + 1 + 8 + (ROW_H + 4) + ROW_H + (ROW_H + 8)
 				+ (ROW_H + 4) + (SWATCH_SIZE + 4) + 8
-				+ (ROW_H + 4) + ROW_H + PAD;
+				+ (ROW_H + 4) + 4;
 		panelX = (width - PANEL_W) / 2;
 		panelY = (height - panelH) / 2;
 	}
 
 	@Override
 	public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {
-		// Skip blur
 	}
 
 	@Override
@@ -61,8 +60,13 @@ public class DeathMarkerSettingsScreen extends Screen {
 		// Panel background
 		ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + panelH, 0xE0202020);
 
+		// Back arrow
+		boolean hoverBack = mouseX >= panelX + 2 && mouseX <= panelX + 14 &&
+				mouseY >= panelY + 2 && mouseY <= panelY + 14;
+		ctx.drawText(textRenderer, "<", panelX + 4, panelY + PAD, hoverBack ? 0xFFFFFF55 : 0xFFAAAAAA, true);
+
 		// Title
-		ctx.drawText(textRenderer, title, panelX + PAD, panelY + PAD, 0xFFFFFF55, true);
+		ctx.drawText(textRenderer, title, panelX + 18, panelY + PAD, 0xFFFFFF55, true);
 
 		// Separator
 		int sepY = panelY + PAD + 14;
@@ -99,14 +103,11 @@ public class DeathMarkerSettingsScreen extends Screen {
 			boolean hover = mouseX >= sx && mouseX <= sx + SWATCH_SIZE &&
 					mouseY >= y && mouseY <= y + SWATCH_SIZE;
 
-			// Border for active
 			if (active) {
 				ctx.fill(sx - 1, y - 1, sx + SWATCH_SIZE + 1, y + SWATCH_SIZE + 1, 0xFFFFFFFF);
 			}
-			// Swatch fill
 			int packed = 0xFF000000 | (c.r << 16) | (c.g << 8) | c.b;
 			ctx.fill(sx, y, sx + SWATCH_SIZE, y + SWATCH_SIZE, packed);
-			// Hover overlay
 			if (hover && !active) {
 				ctx.fill(sx, y, sx + SWATCH_SIZE, y + SWATCH_SIZE, 0x40FFFFFF);
 			}
@@ -122,16 +123,6 @@ public class DeathMarkerSettingsScreen extends Screen {
 		int tw = textRenderer.getWidth(resetTxt);
 		ctx.drawText(textRenderer, resetTxt, bx + (BTN_W - tw) / 2, y + 3, 0xFFFFFFFF, true);
 
-		// Back button
-		int backY = panelY + panelH - PAD - 14;
-		int backW = 60;
-		int backX = panelX + (PANEL_W - backW) / 2;
-		boolean hoverBack = mouseX >= backX && mouseX <= backX + backW &&
-				mouseY >= backY && mouseY <= backY + 14;
-		ctx.fill(backX, backY, backX + backW, backY + 14, hoverBack ? 0xFF555588 : 0xFF444466);
-		int btw = textRenderer.getWidth("Back");
-		ctx.drawText(textRenderer, "Back", backX + (backW - btw) / 2, backY + 3, 0xFFFFFFFF, true);
-
 		super.render(ctx, mouseX, mouseY, delta);
 	}
 
@@ -139,11 +130,18 @@ public class DeathMarkerSettingsScreen extends Screen {
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
 
+		// Back arrow
+		if (mouseX >= panelX + 2 && mouseX <= panelX + 14 &&
+				mouseY >= panelY + 2 && mouseY <= panelY + 14) {
+			client.setScreen(parent);
+			return true;
+		}
+
 		QolConfig.DeathMarker cfg = QolConfig.get().deathmarker;
 
 		int y = panelY + PAD + 14 + 1 + 8 + (ROW_H + 4);
 		if (cfg.x != null) {
-			y += ROW_H + (ROW_H + 8); // X/Y/Z + Dimension + gap
+			y += ROW_H + (ROW_H + 8);
 		} else {
 			y += ROW_H + 8;
 		}
@@ -171,16 +169,6 @@ public class DeathMarkerSettingsScreen extends Screen {
 		if (mouseX >= bx && mouseX <= bx + BTN_W &&
 				mouseY >= y && mouseY <= y + 14) {
 			DeathMarker.reset();
-			return true;
-		}
-
-		// Back button
-		int backY = panelY + panelH - PAD - 14;
-		int backW = 60;
-		int backX = panelX + (PANEL_W - backW) / 2;
-		if (mouseX >= backX && mouseX <= backX + backW &&
-				mouseY >= backY && mouseY <= backY + 14) {
-			client.setScreen(parent);
 			return true;
 		}
 

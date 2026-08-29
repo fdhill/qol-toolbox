@@ -49,8 +49,8 @@ public class VeinMinerSettingsScreen extends Screen {
 
 		// Calculate panel height
 		int whitelistH = VISIBLE_WL * (ROW_H - 2);
-		int bottomRowH = ROW_H + 4 + 12 + 4 + ROW_H + 4; // add field + gap + back button + gap
-		panelH = PAD + 14 + 4 + ROW_H + 4 + 14 + whitelistH + 4 + bottomRowH + PAD;
+		int bottomRowH = ROW_H + 4 + 12; // add field + gap + add button
+		panelH = PAD + 14 + 4 + ROW_H + 4 + 14 + whitelistH + 4 + bottomRowH + 4;
 		panelX = (width - PANEL_W) / 2;
 		panelY = (height - panelH) / 2;
 
@@ -68,7 +68,7 @@ public class VeinMinerSettingsScreen extends Screen {
 		addDrawableChild(maxBlocksField);
 
 		// Add block field
-		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - ROW_H - 4;
+		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - 12;
 		addBlockField = new TextFieldWidget(textRenderer, panelX + PAD, addFieldY,
 				PANEL_W - PAD * 2 - TOGGLE_W - 4, 12, Text.literal("Add block"));
 		addBlockField.setPlaceholder(Text.literal("minecraft:stone"));
@@ -94,7 +94,6 @@ public class VeinMinerSettingsScreen extends Screen {
 
 	@Override
 	public void renderBackground(DrawContext ctx, int mouseX, int mouseY, float delta) {
-		// Skip blur + darkening — game world renders behind panel
 	}
 
 	@Override
@@ -104,8 +103,13 @@ public class VeinMinerSettingsScreen extends Screen {
 		// Panel background
 		ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + panelH, 0xE0202020);
 
+		// Back arrow
+		boolean hoverBack = mouseX >= panelX + 2 && mouseX <= panelX + 14 &&
+				mouseY >= panelY + 2 && mouseY <= panelY + 14;
+		ctx.drawText(textRenderer, "<", panelX + 4, panelY + PAD, hoverBack ? 0xFFFFFF55 : 0xFFAAAAAA, true);
+
 		// Title
-		ctx.drawText(textRenderer, title, panelX + PAD, panelY + PAD, 0xFFFFFF55, true);
+		ctx.drawText(textRenderer, title, panelX + 18, panelY + PAD, 0xFFFFFF55, true);
 
 		// Separator
 		int sepY = panelY + PAD + 14;
@@ -140,7 +144,6 @@ public class VeinMinerSettingsScreen extends Screen {
 			int itemY = wlY + i * (ROW_H - 2);
 			String entry = wl.get(whitelistScroll + i);
 			String display = textRenderer.trimToWidth(entry, PANEL_W - PAD * 2 - 18);
-			// Hover highlight for each item
 			boolean hoverItem = mouseX >= panelX + PAD && mouseX <= panelX + PANEL_W - PAD - 16 &&
 					mouseY >= itemY && mouseY <= itemY + 12;
 			if (hoverItem) {
@@ -157,23 +160,13 @@ public class VeinMinerSettingsScreen extends Screen {
 			ctx.drawText(textRenderer, "(empty — add blocks below)", panelX + PAD + 4, wlY + 20, 0xFF777777, false);
 		}
 
-		// Add block field + button (positioned above Back button with clear spacing)
-		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - ROW_H - 4;
+		// Add block field + button
+		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - 12;
 		int addBtnX = panelX + PANEL_W - PAD - TOGGLE_W;
 		boolean hoverAdd = mouseX >= addBtnX && mouseX <= addBtnX + TOGGLE_W &&
 				mouseY >= addFieldY && mouseY <= addFieldY + 12;
 		ctx.fill(addBtnX, addFieldY, addBtnX + TOGGLE_W, addFieldY + 12, hoverAdd ? 0xFF55AA55 : 0xFF336633);
 		ctx.drawText(textRenderer, "Add", addBtnX + 12, addFieldY + 2, 0xFFFFFFFF, true);
-
-		// Back button
-		int backW = 60;
-		int backX = panelX + (PANEL_W - backW) / 2;
-		int backY = panelY + panelH - PAD - 12;
-		boolean hoverBack = mouseX >= backX && mouseX <= backX + backW &&
-				mouseY >= backY && mouseY <= backY + 12;
-		ctx.fill(backX, backY, backX + backW, backY + 12, hoverBack ? 0xFF555588 : 0xFF444466);
-		int btw = textRenderer.getWidth("Back");
-		ctx.drawText(textRenderer, "Back", backX + (backW - btw) / 2, backY + 2, 0xFFFFFFFF, true);
 
 		// Suggestion dropdown
 		if (!suggestions.isEmpty() && addBlockField.isFocused()) {
@@ -199,14 +192,10 @@ public class VeinMinerSettingsScreen extends Screen {
 				boolean hoverItem = mouseX >= panelX + PAD && mouseX <= panelX + PAD + dropW &&
 						mouseY >= itemY && mouseY <= itemY + 12;
 
-				// Highlight
 				if (selected || hoverItem) {
 					ctx.fill(panelX + PAD, itemY - 1, panelX + PAD + dropW, itemY + 13, 0xFF2A2A4A);
 				}
 
-				// Match highlighting — dim the part before the query match
-				String query = addBlockField.getText().trim().toLowerCase();
-				int matchIdx = id.toLowerCase().indexOf(query);
 				String display = textRenderer.trimToWidth(id, dropW - 8);
 				ctx.drawText(textRenderer, display, panelX + PAD + 4, itemY + 1, 0xFFE0E0E0, false);
 			}
@@ -229,7 +218,14 @@ public class VeinMinerSettingsScreen extends Screen {
 		if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
 
 		QolConfig.VeinMiner cfg = QolConfig.get().veinminer;
-		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - ROW_H - 4;
+		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - 12;
+
+		// Back arrow
+		if (mouseX >= panelX + 2 && mouseX <= panelX + 14 &&
+				mouseY >= panelY + 2 && mouseY <= panelY + 14) {
+			client.setScreen(parent);
+			return true;
+		}
 
 		// Suggestion dropdown click
 		if (!suggestions.isEmpty() && addBlockField.isFocused()) {
@@ -265,16 +261,6 @@ public class VeinMinerSettingsScreen extends Screen {
 		if (mouseX >= addBtnX && mouseX <= addBtnX + TOGGLE_W &&
 				mouseY >= addFieldY && mouseY <= addFieldY + 12) {
 			addBlock();
-			return true;
-		}
-
-		// Back button
-		int backW = 60;
-		int backX = panelX + (PANEL_W - backW) / 2;
-		int backY = panelY + panelH - PAD - 12;
-		if (mouseX >= backX && mouseX <= backX + backW &&
-				mouseY >= backY && mouseY <= backY + 12) {
-			client.setScreen(parent);
 			return true;
 		}
 
@@ -326,7 +312,6 @@ public class VeinMinerSettingsScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical) {
-		// Scroll suggestion dropdown if visible and focused
 		if (!suggestions.isEmpty() && addBlockField.isFocused()) {
 			int maxScroll = Math.max(0, suggestions.size() - VISIBLE_SUGGESTIONS);
 			suggestionScroll = Math.max(0, Math.min(maxScroll, suggestionScroll - (int) Math.signum(vertical)));

@@ -23,7 +23,7 @@ public class TrajectorySettingsScreen extends Screen {
 
 	@Override
 	protected void init() {
-		panelH = PAD + 14 + 4 + ROW_H + 4 + ROW_H + PAD;
+		panelH = PAD + 14 + 4 + ROW_H + 4 + ROW_H;
 		panelX = (width - PANEL_W) / 2;
 		panelY = (height - panelH) / 2;
 	}
@@ -37,7 +37,14 @@ public class TrajectorySettingsScreen extends Screen {
 		QolConfig.Trajectory cfg = QolConfig.get().trajectory;
 
 		ctx.fill(panelX, panelY, panelX + PANEL_W, panelY + panelH, 0xE0202020);
-		ctx.drawText(textRenderer, title, panelX + PAD, panelY + PAD, 0xFFFFFF55, true);
+
+		// Back arrow
+		boolean hoverBack = mouseX >= panelX + 2 && mouseX <= panelX + 14 &&
+				mouseY >= panelY + 2 && mouseY <= panelY + 14;
+		ctx.drawText(textRenderer, "<", panelX + 4, panelY + PAD, hoverBack ? 0xFFFFFF55 : 0xFFAAAAAA, true);
+
+		// Title
+		ctx.drawText(textRenderer, title, panelX + 18, panelY + PAD, 0xFFFFFF55, true);
 
 		int sepY = panelY + PAD + 14;
 		ctx.fill(panelX + PAD, sepY, panelX + PANEL_W - PAD, sepY + 1, 0xFF555555);
@@ -54,22 +61,19 @@ public class TrajectorySettingsScreen extends Screen {
 		int tw = textRenderer.getWidth(txt);
 		ctx.drawText(textRenderer, txt, btnX + (TOGGLE_W - tw) / 2, toggleY + 2, 0xFFFFFFFF, true);
 
-		// Back button
-		int backW = 60;
-		int backX = panelX + (PANEL_W - backW) / 2;
-		int backY = panelY + panelH - PAD - 12;
-		boolean hoverBack = mouseX >= backX && mouseX <= backX + backW &&
-				mouseY >= backY && mouseY <= backY + 12;
-		ctx.fill(backX, backY, backX + backW, backY + 12, hoverBack ? 0xFF555588 : 0xFF444466);
-		int btw = textRenderer.getWidth("Back");
-		ctx.drawText(textRenderer, "Back", backX + (backW - btw) / 2, backY + 2, 0xFFFFFFFF, true);
-
 		super.render(ctx, mouseX, mouseY, delta);
 	}
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
+
+		// Back arrow
+		if (mouseX >= panelX + 2 && mouseX <= panelX + 14 &&
+				mouseY >= panelY + 2 && mouseY <= panelY + 14) {
+			client.setScreen(parent);
+			return true;
+		}
 
 		QolConfig.Trajectory cfg = QolConfig.get().trajectory;
 		int toggleY = panelY + PAD + 14 + 8;
@@ -80,16 +84,6 @@ public class TrajectorySettingsScreen extends Screen {
 				mouseY >= toggleY && mouseY <= toggleY + 12) {
 			cfg.enabled = !cfg.enabled;
 			QolConfig.save();
-			return true;
-		}
-
-		// Back
-		int backW = 60;
-		int backX = panelX + (PANEL_W - backW) / 2;
-		int backY = panelY + panelH - PAD - 12;
-		if (mouseX >= backX && mouseX <= backX + backW &&
-				mouseY >= backY && mouseY <= backY + 12) {
-			client.setScreen(parent);
 			return true;
 		}
 
