@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class SettingsScreen extends Screen {
 	private static final int PANEL_W = 220;
@@ -22,7 +23,7 @@ public class SettingsScreen extends Screen {
 	private final List<ToggleRow> toggles = new ArrayList<>();
 
 	private record ToggleRow(int index, String label, java.util.function.BooleanSupplier getter,
-			java.util.function.Consumer<Boolean> setter) {
+			java.util.function.Consumer<Boolean> setter, Supplier<Screen> settingsScreen) {
 	}
 
 	public SettingsScreen() {
@@ -35,15 +36,20 @@ public class SettingsScreen extends Screen {
 		toggles.clear();
 
 		toggles.add(new ToggleRow(0, "Fullbright",
-				() -> cfg.fullbright.enabled, v -> { cfg.fullbright.enabled = v; Fullbright.set(v); }));
+				() -> cfg.fullbright.enabled, v -> { cfg.fullbright.enabled = v; Fullbright.set(v); },
+				() -> new FullbrightSettingsScreen(this)));
 		toggles.add(new ToggleRow(1, "Trajectory",
-				() -> cfg.trajectory.enabled, v -> cfg.trajectory.enabled = v));
+				() -> cfg.trajectory.enabled, v -> cfg.trajectory.enabled = v,
+				() -> new TrajectorySettingsScreen(this)));
 		toggles.add(new ToggleRow(2, "Death Marker",
-				() -> cfg.deathmarker.enabled, v -> cfg.deathmarker.enabled = v));
+				() -> cfg.deathmarker.enabled, v -> cfg.deathmarker.enabled = v,
+				() -> new DeathMarkerSettingsScreen(this)));
 		toggles.add(new ToggleRow(3, "Recipe Viewer",
-				() -> cfg.recipeviewer.enabled, v -> cfg.recipeviewer.enabled = v));
+				() -> cfg.recipeviewer.enabled, v -> cfg.recipeviewer.enabled = v,
+				() -> new RecipeViewerSettingsScreen(this)));
 		toggles.add(new ToggleRow(4, "Vein Miner",
-				() -> cfg.veinminer.enabled, v -> cfg.veinminer.enabled = v));
+				() -> cfg.veinminer.enabled, v -> cfg.veinminer.enabled = v,
+				() -> new VeinMinerSettingsScreen(this)));
 
 		int panelH = PAD + 14 + toggles.size() * ROW_H + PAD;
 		panelX = (width - PANEL_W) / 2;
@@ -85,18 +91,8 @@ public class SettingsScreen extends Screen {
 
 			int btnX = panelX + PANEL_W - PAD;
 
-			// Settings button for DeathMarker (...)
-			if (row.index == 2) {
-				int sx = btnX - SETTINGS_W - 4;
-				boolean hoverS = mouseX >= sx && mouseX <= sx + SETTINGS_W &&
-						mouseY >= absY + 2 && mouseY <= absY + 14;
-				ctx.fill(sx, absY + 2, sx + SETTINGS_W, absY + 14, hoverS ? 0xFF555588 : 0xFF444466);
-				ctx.drawText(textRenderer, "...", sx + 3, absY + 4, 0xFFFFFFFF, true);
-				btnX = sx - 4;
-			}
-
-			// Settings button for VeinMiner (...)
-			if (row.index == 4) {
+			// Settings button (...)
+			if (row.settingsScreen != null) {
 				int sx = btnX - SETTINGS_W - 4;
 				boolean hoverS = mouseX >= sx && mouseX <= sx + SETTINGS_W &&
 						mouseY >= absY + 2 && mouseY <= absY + 14;
@@ -138,23 +134,12 @@ public class SettingsScreen extends Screen {
 			int absY = panelY + PAD + 14 + row.index * ROW_H;
 			int btnX = panelX + PANEL_W - PAD;
 
-			// Settings button (...) for DeathMarker
-			if (row.index == 2) {
+			// Settings button (...)
+			if (row.settingsScreen != null) {
 				int sx = btnX - SETTINGS_W - 4;
 				if (mouseX >= sx && mouseX <= sx + SETTINGS_W &&
 						mouseY >= absY + 2 && mouseY <= absY + 14) {
-					client.setScreen(new DeathMarkerSettingsScreen(this));
-					return true;
-				}
-				btnX = sx - 4;
-			}
-
-			// Settings button (...) for VeinMiner
-			if (row.index == 4) {
-				int sx = btnX - SETTINGS_W - 4;
-				if (mouseX >= sx && mouseX <= sx + SETTINGS_W &&
-						mouseY >= absY + 2 && mouseY <= absY + 14) {
-					client.setScreen(new VeinMinerSettingsScreen(this));
+					client.setScreen(row.settingsScreen.get());
 					return true;
 				}
 				btnX = sx - 4;
