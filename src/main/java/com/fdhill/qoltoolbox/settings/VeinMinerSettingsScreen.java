@@ -4,7 +4,9 @@ import com.fdhill.qoltoolbox.config.QolConfig;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
 
@@ -14,6 +16,7 @@ public class VeinMinerSettingsScreen extends Screen {
 	private static final int TOGGLE_W = 40;
 	private static final int PAD = 8;
 	private static final int VISIBLE_WL = 8;
+	private static final int VISIBLE_SUGGESTIONS = 6;
 
 	private final Screen parent;
 	private int panelX;
@@ -24,6 +27,11 @@ public class VeinMinerSettingsScreen extends Screen {
 	private TextFieldWidget addBlockField;
 	private int whitelistScroll;
 
+	private List<String> allBlockIds = List.of();
+	private List<String> suggestions = List.of();
+	private int selectedSuggestion = -1;
+	private int suggestionScroll = 0;
+
 	public VeinMinerSettingsScreen(Screen parent) {
 		super(Text.literal("Vein Miner Settings"));
 		this.parent = parent;
@@ -32,6 +40,12 @@ public class VeinMinerSettingsScreen extends Screen {
 	@Override
 	protected void init() {
 		QolConfig.VeinMiner cfg = QolConfig.get().veinminer;
+
+		// Load all block IDs from registry
+		allBlockIds = Registries.BLOCK.getIds().stream()
+				.map(Identifier::toString)
+				.sorted()
+				.toList();
 
 		// Calculate panel height
 		int whitelistH = VISIBLE_WL * (ROW_H - 2);
@@ -58,7 +72,24 @@ public class VeinMinerSettingsScreen extends Screen {
 		addBlockField = new TextFieldWidget(textRenderer, panelX + PAD, addFieldY,
 				PANEL_W - PAD * 2 - TOGGLE_W - 4, 12, Text.literal("Add block"));
 		addBlockField.setPlaceholder(Text.literal("minecraft:stone"));
+		addBlockField.setChangedListener(this::updateSuggestions);
 		addDrawableChild(addBlockField);
+	}
+
+	private void updateSuggestions(String input) {
+		String query = input.trim().toLowerCase();
+		if (query.isEmpty()) {
+			suggestions = List.of();
+			selectedSuggestion = -1;
+			suggestionScroll = 0;
+			return;
+		}
+		suggestions = allBlockIds.stream()
+				.filter(id -> id.contains(query))
+				.limit(50)
+				.toList();
+		selectedSuggestion = suggestions.isEmpty() ? -1 : 0;
+		suggestionScroll = 0;
 	}
 
 	@Override
@@ -144,6 +175,52 @@ public class VeinMinerSettingsScreen extends Screen {
 		int btw = textRenderer.getWidth("Back");
 		ctx.drawText(textRenderer, "Back", backX + (backW - btw) / 2, backY + 2, 0xFFFFFFFF, true);
 
+		// Suggestion dropdown
+		if (!suggestions.isEmpty() && addBlockField.isFocused()) {
+			int dropY = addFieldY + 14;
+			int dropW = PANEL_W - PAD * 2;
+			int visibleCount = Math.min(suggestions.size(), VISIBLE_SUGGESTIONS);
+			int dropH = visibleCount * (ROW_H - 2) + 4;
+
+			// Clamp scroll
+			int sugMaxScroll = Math.max(0, suggestions.size() - VISIBLE_SUGGESTIONS);
+			suggestionScroll = Math.max(0, Math.min(sugMaxScroll, suggestionScroll));
+
+			// Dropdown background
+			ctx.fill(panelX + PAD, dropY, panelX + PAD + dropW, dropY + dropH, 0xFF1A1A2A);
+			ctx.fill(panelX + PAD, dropY, panelX + PAD + dropW, dropY + 1, 0xFF555555);
+
+			// Suggestion items
+			for (int i = 0; i < visibleCount; i++) {
+				int idx = suggestionScroll + i;
+				int itemY = dropY + 2 + i * (ROW_H - 2);
+				String id = suggestions.get(idx);
+				boolean selected = idx == selectedSuggestion;
+				boolean hoverItem = mouseX >= panelX + PAD && mouseX <= panelX + PAD + dropW &&
+						mouseY >= itemY && mouseY <= itemY + 12;
+
+				// Highlight
+				if (selected || hoverItem) {
+					ctx.fill(panelX + PAD, itemY - 1, panelX + PAD + dropW, itemY + 13, 0xFF2A2A4A);
+				}
+
+				// Match highlighting — dim the part before the query match
+				String query = addBlockField.getText().trim().toLowerCase();
+				int matchIdx = id.toLowerCase().indexOf(query);
+				String display = textRenderer.trimToWidth(id, dropW - 8);
+				ctx.drawText(textRenderer, display, panelX + PAD + 4, itemY + 1, 0xFFE0E0E0, false);
+			}
+
+			// Scroll indicator
+			if (suggestions.size() > VISIBLE_SUGGESTIONS) {
+				String scrollTxt = (suggestionScroll + 1) + "-" +
+						Math.min(suggestionScroll + VISIBLE_SUGGESTIONS, suggestions.size()) +
+						"/" + suggestions.size();
+				int sw = textRenderer.getWidth(scrollTxt);
+				ctx.drawText(textRenderer, scrollTxt, panelX + PAD + dropW - sw - 4, dropY + 2, 0xFF888888, true);
+			}
+		}
+
 		super.render(ctx, mouseX, mouseY, delta);
 	}
 
@@ -152,6 +229,24 @@ public class VeinMinerSettingsScreen extends Screen {
 		if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
 
 		QolConfig.VeinMiner cfg = QolConfig.get().veinminer;
+		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - ROW_H - 4;
+
+		// Suggestion dropdown click
+		if (!suggestions.isEmpty() && addBlockField.isFocused()) {
+			int dropY = addFieldY + 14;
+			int dropW = PANEL_W - PAD * 2;
+			int visibleCount = Math.min(suggestions.size(), VISIBLE_SUGGESTIONS);
+
+			for (int i = 0; i < visibleCount; i++) {
+				int idx = suggestionScroll + i;
+				int itemY = dropY + 2 + i * (ROW_H - 2);
+				if (mouseX >= panelX + PAD && mouseX <= panelX + PAD + dropW &&
+						mouseY >= itemY && mouseY <= itemY + 12) {
+					selectSuggestion(idx);
+					return true;
+				}
+			}
+		}
 
 		// Whitelist remove clicks
 		int wlY = panelY + PAD + 14 + 4 + ROW_H + 4 + 12;
@@ -166,7 +261,6 @@ public class VeinMinerSettingsScreen extends Screen {
 		}
 
 		// Add block button
-		int addFieldY = panelY + panelH - PAD - ROW_H - 4 - ROW_H - 4;
 		int addBtnX = panelX + PANEL_W - PAD - TOGGLE_W;
 		if (mouseX >= addBtnX && mouseX <= addBtnX + TOGGLE_W &&
 				mouseY >= addFieldY && mouseY <= addFieldY + 12) {
@@ -188,7 +282,56 @@ public class VeinMinerSettingsScreen extends Screen {
 	}
 
 	@Override
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (!suggestions.isEmpty() && addBlockField.isFocused()) {
+			if (keyCode == 265) { // Arrow Up
+				if (selectedSuggestion > 0) {
+					selectedSuggestion--;
+					if (selectedSuggestion < suggestionScroll) suggestionScroll = selectedSuggestion;
+				}
+				return true;
+			}
+			if (keyCode == 264) { // Arrow Down
+				if (selectedSuggestion < suggestions.size() - 1) {
+					selectedSuggestion++;
+					if (selectedSuggestion >= suggestionScroll + VISIBLE_SUGGESTIONS) {
+						suggestionScroll = selectedSuggestion - VISIBLE_SUGGESTIONS + 1;
+					}
+				}
+				return true;
+			}
+			if (keyCode == 257 || keyCode == 335) { // Enter or Numpad Enter
+				if (selectedSuggestion >= 0 && selectedSuggestion < suggestions.size()) {
+					selectSuggestion(selectedSuggestion);
+					return true;
+				}
+			}
+			if (keyCode == 258) { // Tab
+				if (selectedSuggestion >= 0 && selectedSuggestion < suggestions.size()) {
+					selectSuggestion(selectedSuggestion);
+					return true;
+				}
+			}
+		}
+		return super.keyPressed(keyCode, scanCode, modifiers);
+	}
+
+	private void selectSuggestion(int idx) {
+		String selected = suggestions.get(idx);
+		addBlockField.setText(selected);
+		suggestions = List.of();
+		selectedSuggestion = -1;
+		suggestionScroll = 0;
+	}
+
+	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical) {
+		// Scroll suggestion dropdown if visible and focused
+		if (!suggestions.isEmpty() && addBlockField.isFocused()) {
+			int maxScroll = Math.max(0, suggestions.size() - VISIBLE_SUGGESTIONS);
+			suggestionScroll = Math.max(0, Math.min(maxScroll, suggestionScroll - (int) Math.signum(vertical)));
+			return true;
+		}
 		whitelistScroll -= (int) Math.signum(vertical);
 		return true;
 	}
