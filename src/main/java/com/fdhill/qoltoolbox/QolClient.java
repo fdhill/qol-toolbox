@@ -2,6 +2,7 @@ package com.fdhill.qoltoolbox;
 
 import com.fdhill.qoltoolbox.config.QolConfig;
 import com.fdhill.qoltoolbox.deathmarker.DeathMarker;
+import com.fdhill.qoltoolbox.dynamiclights.DynamicLights;
 import com.fdhill.qoltoolbox.fullbright.Fullbright;
 import com.fdhill.qoltoolbox.recipeviewer.RecipeViewerScreen;
 import com.fdhill.qoltoolbox.settings.SettingsScreen;
@@ -9,6 +10,7 @@ import com.fdhill.qoltoolbox.trajectory.TrajectoryRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -52,6 +54,10 @@ public class QolClient implements ClientModInitializer {
 			while (settingsKey.wasPressed()) {
 				openSettings(client);
 			}
+			// Dynamic lights: update light block at player's feet
+			if (client.player != null) {
+				DynamicLights.tick(client.player);
+			}
 			// Death marker: detect death screen shown
 			if (client.currentScreen instanceof DeathScreen) {
 				if (!deathScreenShown && client.player != null) {
@@ -60,6 +66,13 @@ public class QolClient implements ClientModInitializer {
 				}
 			} else {
 				deathScreenShown = false;
+			}
+		});
+
+		// Cleanup dynamic lights block when disconnecting
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			if (client.player != null) {
+				DynamicLights.cleanup(client.player);
 			}
 		});
 

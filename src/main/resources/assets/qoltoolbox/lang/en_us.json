@@ -16,5 +16,6 @@
 	"commands.qoltoolbox.veinminer.not_found": "%s not found",
 	"commands.qoltoolbox.veinminer.list": "Whitelist (%d): %s",
 	"commands.qoltoolbox.veinminer.max_set": "Max blocks: %d",
-	"commands.qoltoolbox.veinminer.toggle": "Vein Miner: %s"
+	"commands.qoltoolbox.veinminer.toggle": "Vein Miner: %s",
+	"screen.qoltoolbox.dynamiclights": "Dynamic Lights Settings"
 }

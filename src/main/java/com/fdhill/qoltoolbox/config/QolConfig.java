@@ -17,6 +17,7 @@ public class QolConfig {
 	public DeathMarker deathmarker = new DeathMarker();
 	public RecipeViewer recipeviewer = new RecipeViewer();
 	public VeinMiner veinminer = new VeinMiner();
+	public DynamicLights dynamiclights = new DynamicLights();
 
 	public static class Fullbright {
 		public boolean enabled = false;
@@ -55,6 +56,10 @@ public class QolConfig {
 			"minecraft:copper_ore", "minecraft:deepslate_copper_ore",
 			"minecraft:nether_gold_ore", "minecraft:nether_quartz_ore"
 		));
+	}
+
+	public static class DynamicLights {
+		public boolean enabled = true;
 	}
 
 	private static QolConfig instance;

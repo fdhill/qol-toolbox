@@ -1,6 +1,7 @@
 package com.fdhill.qoltoolbox.settings;
 
 import com.fdhill.qoltoolbox.config.QolConfig;
+import com.fdhill.qoltoolbox.dynamiclights.DynamicLights;
 import com.fdhill.qoltoolbox.fullbright.Fullbright;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -50,6 +51,10 @@ public class SettingsScreen extends Screen {
 		toggles.add(new ToggleRow(4, "Vein Miner",
 				() -> cfg.veinminer.enabled, v -> cfg.veinminer.enabled = v,
 				() -> new VeinMinerSettingsScreen(this)));
+		toggles.add(new ToggleRow(5, "Dynamic Lights",
+				() -> cfg.dynamiclights.enabled,
+				v -> { cfg.dynamiclights.enabled = v; if (!v && client != null && client.player != null) DynamicLights.cleanup(client.player); },
+				() -> new DynamicLightsSettingsScreen(this)));
 
 		int panelH = PAD + 14 + toggles.size() * ROW_H + PAD;
 		panelX = (width - PANEL_W) / 2;
